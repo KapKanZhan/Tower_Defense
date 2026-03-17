@@ -11,11 +11,11 @@ TagManager:
   - 
   - Water
   - UI
+  - Environments
   - 
   - 
   - 
-  - 
-  - 
+  - Shadows
   - 
   - 
   - 
@@ -40,4 +40,16 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Ground
+    uniqueID: 3612538125
+    locked: 0
+  - name: DecorLow
+    uniqueID: 1907691749
+    locked: 0
+  - name: Nature
+    uniqueID: 1874822281
+    locked: 0
+  - name: Object
+    uniqueID: 4172152867
     locked: 0
