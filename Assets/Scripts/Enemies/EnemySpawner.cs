@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private BaseHealth baseHealth;
     [SerializeField] private WaveData[] waves;
 
@@ -17,6 +16,8 @@ public class EnemySpawner : MonoBehaviour
     public int TotalWaves => waves.Length;
     public bool IsWaveRunning => isWaveRunning;
     public bool HasMoreWaves => currentWaveIndex + 1 < waves.Length;
+
+    public int AliveEnemies => aliveEnemies;
 
     public event Action<int, int> OnWaveStarted;
     public event Action<int, int> OnWaveCompleted;
@@ -46,7 +47,7 @@ public class EnemySpawner : MonoBehaviour
             {
                 WaveLane lane = wave.lanes[i];
 
-                if (lane.path == null || lane.enemyCount <= 0)
+                if (lane.path == null || lane.enemyGroups == null || lane.enemyGroups.Length == 0)
                     continue;
 
                 activeLaneCoroutines++;
@@ -67,24 +68,36 @@ public class EnemySpawner : MonoBehaviour
 
     private IEnumerator SpawnLaneRoutine(WaveLane lane)
     {
-        for (int i = 0; i < lane.enemyCount; i++)
+        for (int groupIndex = 0; groupIndex < lane.enemyGroups.Length; groupIndex++)
         {
-            SpawnEnemy(lane.path);
-            yield return new WaitForSeconds(lane.spawnDelay);
+            EnemySpawnGroup group = lane.enemyGroups[groupIndex];
+
+            if (group.enemyPrefab == null || group.enemyCount <= 0)
+                continue;
+
+            for (int i = 0; i < group.enemyCount; i++)
+            {
+                SpawnEnemy(group.enemyPrefab, lane.path);
+                yield return new WaitForSeconds(group.spawnDelay);
+            }
         }
 
         activeLaneCoroutines--;
     }
 
-    private void SpawnEnemy(EnemyPath enemyPath)
+    private void SpawnEnemy(GameObject enemyPrefab, EnemyPath enemyPath)
     {
         GameObject enemyObject = Instantiate(enemyPrefab);
         EnemyMovement enemyMovement = enemyObject.GetComponent<EnemyMovement>();
 
         if (enemyMovement == null || enemyPath == null || baseHealth == null)
+        {
+            Destroy(enemyObject);
             return;
+        }
 
         aliveEnemies++;
+
         enemyMovement.Init(enemyPath.Waypoints, baseHealth);
         enemyMovement.OnEnemyRemoved += HandleEnemyRemoved;
     }
@@ -93,5 +106,6 @@ public class EnemySpawner : MonoBehaviour
     {
         enemy.OnEnemyRemoved -= HandleEnemyRemoved;
         aliveEnemies = Mathf.Max(0, aliveEnemies - 1);
+
     }
 }

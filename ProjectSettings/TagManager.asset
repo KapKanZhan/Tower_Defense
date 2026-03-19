@@ -50,6 +50,9 @@ TagManager:
   - name: Nature
     uniqueID: 1874822281
     locked: 0
+  - name: BuildSpots
+    uniqueID: 2743478663
+    locked: 0
   - name: Enemy
     uniqueID: 2398461095
     locked: 0
